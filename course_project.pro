@@ -17,4 +17,5 @@ HEADERS += \
     token.h \
     date.h \
     database.h \
-    node.h
+    node.h \
+    test_runner.h
