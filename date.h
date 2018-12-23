@@ -20,6 +20,14 @@ public:
   int GetMonth() const;
   int GetDay() const;
 
+  // даты будут по умолчанию выводиться в нужном формате
+  ostream& operator<<(ostream& stream) {
+    stream << setw(4) << setfill('0') << year <<
+        "-" << setw(2) << setfill('0') << month <<
+        "-" << setw(2) << setfill('0') << day;
+    return stream;
+  }
+
 private:
   int year;
   int month;
