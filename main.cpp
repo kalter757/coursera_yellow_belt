@@ -12,12 +12,25 @@ using namespace std;
 
 string ParseEvent(istream& is) {
     // Реализуйте эту функцию
+    string event;
+
+    while (is.peek() == ' ')
+    {
+        is.ignore(1);
+    }
+
+    getline(is, event);
+
+    return event;
 }
 
 Date ParseDate(istream& stream)
 {
     string date_str;
-    getline(stream, date_str);
+    if (stream.peek() == ' ')
+        stream.ignore(1);
+
+    getline(stream, date_str, ' ');
     istringstream is(date_str);
 
     bool ok = true;
@@ -113,6 +126,10 @@ void TestParseEvent() {
     {
         istringstream is("event");
         AssertEqual(ParseEvent(is), "event", "Parse event without leading spaces");
+    }
+    {
+        istringstream is("");
+        AssertEqual(ParseEvent(is), "", "Parse empty event without leading spaces");
     }
     {
         istringstream is("   sport event ");
@@ -298,13 +315,14 @@ void TestLastDate()
     }
 }
 
+
 void TestAll() {
     TestRunner tr;
     tr.RunTest(TestAddDatabase, "TestAddDatabase");
     tr.RunTest(TestParseDate, "TestParseDate");
     tr.RunTest(TestPrintDate, "TestPrintDate");
     tr.RunTest(TestLastDate, "TestLastDate");
+    tr.RunTest(TestParseEvent, "TestParseEvent");
 
-//    tr.RunTest(TestParseEvent, "TestParseEvent");
 //    tr.RunTest(TestParseCondition, "TestParseCondition");
 }
