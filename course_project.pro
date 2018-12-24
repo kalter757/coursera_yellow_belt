@@ -5,17 +5,17 @@ CONFIG -= qt
 
 SOURCES += \
         main.cpp \
-    condition_parser.cpp \
-    condition_parser_test.cpp \
-    token.cpp \
+#    condition_parser.cpp \
+#    condition_parser_test.cpp \
+#    token.cpp \
     date.cpp \
-    database.cpp \
-    node.cpp
+    database.cpp
+#    node.cpp
 
 HEADERS += \
-    condition_parser.h \
-    token.h \
+#    condition_parser.h \
+#    token.h \
     date.h \
     database.h \
-    node.h \
+#    node.h \
     test_runner.h

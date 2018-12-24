@@ -2,14 +2,18 @@
 
 
 void Database::Add(const Date& date, const string& event) {
-    storage[date].insert(event);
+    auto result = storage[date].insert(event);
+    if ( result.second )
+    {
+        storage_vector[date].push_back(event);
+    }
 }
 
 bool Database::DeleteEvent(const Date& date, const string& event) {
-    if (storage.count(date) > 0 && storage[date].count(event) > 0) {
-        storage[date].erase(event);
-        return true;
-    }
+//    if (storage.count(date) > 0 && storage[date].count(event) > 0) {
+//        storage[date].erase(event);
+//        return true;
+//    }
     return false;
 }
 
@@ -31,10 +35,32 @@ set<string> Database::Find(const Date& date) const {
     }
 }
 
-void Database::Print(iostream &stream) const {
-    for (const auto& item : storage) {
+void Database::Print(ostream &stream) const {
+    for (const auto& item : storage_vector) {
         for (const string& event : item.second) {
             stream << item.first << " " << event << endl;
         }
     }
+}
+
+string Database::Last(const Date &date)
+{
+    auto result = storage.lower_bound(date);
+
+    ostringstream stream;
+    if (result == storage.end())
+    {
+        stream << storage.rbegin()->first << " " <<  *storage.rbegin()->second.rbegin() << endl;
+    }
+    else
+    {
+        if (date < result->first)
+        {
+            throw invalid_argument("Less date event!");
+        }
+
+        stream << result->first << " " << *result->second.rbegin() << endl;
+    }
+
+    return stream.str();
 }

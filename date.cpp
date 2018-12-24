@@ -22,3 +22,25 @@ int Date::GetMonth() const {
 int Date::GetDay() const {
     return day;
 }
+
+ostream& operator<<(ostream& stream, const Date &rhs) {
+  stream << setw(4) << setfill('0') << rhs.GetYear() <<
+      "-" << setw(2) << setfill('0') << rhs.GetMonth() <<
+      "-" << setw(2) << setfill('0') << rhs.GetDay();
+  return stream;
+}
+
+bool operator<(const Date &lhs, const Date &rhs)
+{
+    return make_tuple(lhs.GetYear(), lhs.GetMonth(), lhs.GetDay()) < make_tuple(rhs.GetYear(), rhs.GetMonth(), rhs.GetDay());
+}
+
+bool operator==(const Date &lhs, const Date &rhs)
+{
+    return make_tuple(lhs.GetYear(), lhs.GetMonth(), lhs.GetDay()) == make_tuple(rhs.GetYear(), rhs.GetMonth(), rhs.GetDay());
+}
+
+bool operator!=(const Date &lhs, const Date &rhs)
+{
+    return !(lhs == rhs);
+}

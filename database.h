@@ -8,6 +8,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <algorithm>
+
+#include <stdint.h>
 
 #include "date.h"
 
@@ -24,8 +27,11 @@ public:
 
   set<string> Find(const Date& date) const;
 
-  void Print(iostream& stream) const;
+  void Print(ostream& stream) const;
+
+  string Last(const Date& date);
 
 private:
   map<Date, set<string>> storage;
+  map<Date, vector<string>> storage_vector;
 };
