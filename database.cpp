@@ -64,3 +64,23 @@ string Database::Last(const Date &date)
 
     return stream.str();
 }
+
+vector<string> Database::FindIf(function<bool (const Date& date, const string& event)> func)
+{
+    vector<string> result;
+
+    for (const auto& date_events : storage_vector)
+    {
+        for (const auto& event : date_events.second)
+        {
+            if (func(date_events.first, event))
+            {
+                ostringstream stream;
+                stream << date_events.first << " " << event;
+                result.push_back(stream.str());
+            }
+        }
+    }
+
+    return result;
+}

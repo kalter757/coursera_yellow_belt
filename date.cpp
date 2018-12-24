@@ -44,3 +44,18 @@ bool operator!=(const Date &lhs, const Date &rhs)
 {
     return !(lhs == rhs);
 }
+
+bool operator>(const Date &lhs, const Date &rhs)
+{
+    return (lhs != rhs) && (rhs < lhs);
+}
+
+bool operator<=(const Date &lhs, const Date &rhs)
+{
+    return (lhs < rhs) || (lhs == rhs);
+}
+
+bool operator>=(const Date &lhs, const Date &rhs)
+{
+    return (lhs > rhs) || (lhs == rhs);
+}

@@ -315,6 +315,176 @@ void TestLastDate()
     }
 }
 
+void TestFindIfDate()
+{
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        vector<string> result = {"0000-01-02 event_1", "0000-01-02 event_2", "0000-01-02 event_3"};
+
+        auto condition = [](const Date& date, const string& event) {
+            return date == Date(0,1,2);
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_1");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+        db.Add({0,2,1}, "event_6");
+
+        vector<string> result = {"0000-02-01 event_4", "0000-02-01 event_5", "0000-02-01 event_6"};
+
+        auto condition = [](const Date& date, const string& event) {
+            return date == Date(0,2,1);
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_2");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+        db.Add({0,2,1}, "event_6");
+
+        vector<string> result = {"0000-02-01 event_5"};
+
+        auto condition = [](const Date& date, const string& event) {
+            return (date == Date(0,2,1)) && (event == "event_5");
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_3");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+        db.Add({0,2,1}, "event_6");
+
+        vector<string> result;
+
+        auto condition = [](const Date& date, const string& event) {
+            return (date == Date(0,2,1)) && (event == "event_10");
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_4");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+        db.Add({0,2,1}, "event_6");
+
+        vector<string> result = {"0000-01-02 event_1",
+                                 "0000-01-02 event_2",
+                                 "0000-01-02 event_3",
+                                 "0000-02-01 event_4",
+                                 "0000-02-01 event_5",
+                                 "0000-02-01 event_6"};
+
+        auto condition = [](const Date& date, const string& event) {
+            return (date > Date(0,1,1)) && (date < Date(0,2,2));
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_5");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+
+        db.Add({0,2,2}, "event_6");
+
+        vector<string> result = {"0000-01-02 event_1",
+                                 "0000-01-02 event_2",
+                                 "0000-01-02 event_3",
+                                 "0000-02-01 event_4",
+                                 "0000-02-01 event_5"};
+
+        auto condition = [](const Date& date, const string& event) {
+            return (date > Date(0,1,1)) && (date < Date(0,2,2));
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_5");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+
+        db.Add({0,2,2}, "event_6");
+
+        vector<string> result = {"0000-01-02 event_1",
+                                 "0000-01-02 event_2",
+                                 "0000-01-02 event_3",
+                                 "0000-02-01 event_4",
+                                 "0000-02-01 event_5",
+                                 "0000-02-02 event_6"};
+
+        auto condition = [](const Date& date, const string& event) {
+            return (date >= Date(0,1,1)) && (date <= Date(0,2,2));
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_6");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+
+        db.Add({0,2,2}, "event_6");
+
+        vector<string> result = {"0000-01-02 event_1",
+                                 "0000-01-02 event_3",
+                                 "0000-02-02 event_6"};
+
+        auto condition = [](const Date& date, const string& event) {
+            return (date != Date(0,2,1)) && (event != "event_2");
+        };
+
+        AssertEqual(db.FindIf(condition), result, "FindIf date_6");
+    }
+}
 
 void TestAll() {
     TestRunner tr;
@@ -323,6 +493,7 @@ void TestAll() {
     tr.RunTest(TestPrintDate, "TestPrintDate");
     tr.RunTest(TestLastDate, "TestLastDate");
     tr.RunTest(TestParseEvent, "TestParseEvent");
+    tr.RunTest(TestFindIfDate, "TestFindIfDate");
 
 //    tr.RunTest(TestParseCondition, "TestParseCondition");
 }

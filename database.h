@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 #include <stdint.h>
 
@@ -30,6 +31,8 @@ public:
   void Print(ostream& stream) const;
 
   string Last(const Date& date);
+
+  vector<string> FindIf(function<bool (const Date& date, const string& event)> func);
 
 private:
   map<Date, set<string>> storage;
