@@ -1,7 +1,7 @@
 #include "database.h"
 #include "date.h"
-//#include "condition_parser.h"
-//#include "node.h"
+#include "condition_parser.h"
+#include "node.h"
 #include "test_runner.h"
 
 #include <iostream>
@@ -22,39 +22,6 @@ string ParseEvent(istream& is) {
     getline(is, event);
 
     return event;
-}
-
-Date ParseDate(istream& stream)
-{
-    string date_str;
-    if (stream.peek() == ' ')
-        stream.ignore(1);
-
-    getline(stream, date_str, ' ');
-    istringstream is(date_str);
-
-    bool ok = true;
-
-    int year;
-    ok = ok && (is >> year);
-    ok = ok && (is.peek() == '-');
-    is.ignore(1);
-
-    int month;
-    ok = ok && (is >> month);
-    ok = ok && (is.peek() == '-');
-    is.ignore(1);
-
-    int day;
-    ok = ok && (is >> day);
-    ok = ok && (is.eof());
-
-    if (!ok)
-    {
-        throw logic_error("Wrong date format: " + date_str);
-    }
-
-    return {year, month, day};
 }
 
 void TestAll();
@@ -88,19 +55,19 @@ int main() {
 //            int count = db.RemoveIf(predicate);
 //            cout << "Removed " << count << " entries" << endl;
 //        }
-//        else if (command == "Find")
-//        {
-//            auto condition = ParseCondition(is);
-//            auto predicate = [condition](const Date& date, const string& event) {
-//                return condition->Evaluate(date, event);
-//            };
+        else if (command == "Find")
+        {
+            auto condition = ParseCondition(is);
+            auto predicate = [condition](const Date& date, const string& event) {
+                return condition->Evaluate(date, event);
+            };
 
-//            const auto entries = db.FindIf(predicate);
-//            for (const auto& entry : entries) {
-//                cout << entry << endl;
-//            }
-//            cout << "Found " << entries.size() << " entries" << endl;
-//        }
+            const auto entries = db.FindIf(predicate);
+            for (const auto& entry : entries) {
+                cout << entry << endl;
+            }
+            cout << "Found " << entries.size() << " entries" << endl;
+        }
         else if (command == "Last")
         {
             try {
@@ -486,6 +453,160 @@ void TestFindIfDate()
     }
 }
 
+void TestDateComparisonNode()
+{
+    {
+        DateComparisonNode dateNode(Comparison::Less, {2017,6,15});
+        Assert(dateNode.Evaluate({2017,6,14}, "event"), "DateComparisonNode Less OK");
+    }
+    {
+        DateComparisonNode dateNode(Comparison::Less, {2017,6,15});
+        Assert(!dateNode.Evaluate({2017,6,15}, "event"), "DateComparisonNode Less NOT OK");
+    }
+
+    {
+        DateComparisonNode dateNode(Comparison::LessOrEqual, {2017,6,15});
+        Assert(dateNode.Evaluate({2017,6,15}, "event"), "DateComparisonNode LessOrEqual OK");
+    }
+    {
+        DateComparisonNode dateNode(Comparison::LessOrEqual, {2017,6,15});
+        Assert(!dateNode.Evaluate({2017,6,16}, "event"), "DateComparisonNode LessOrEqual NOT OK");
+    }
+
+    {
+        DateComparisonNode dateNode(Comparison::Greater, {2017,6,15});
+        Assert(dateNode.Evaluate({2017,6,16}, "event"), "DateComparisonNode Greater OK");
+    }
+    {
+        DateComparisonNode dateNode(Comparison::Greater, {2017,6,15});
+        Assert(!dateNode.Evaluate({2017,6,15}, "event"), "DateComparisonNode Greater NOT OK");
+    }
+
+    {
+        DateComparisonNode dateNode(Comparison::GreaterOrEqual, {2017,6,15});
+        Assert(dateNode.Evaluate({2017,6,15}, "event"), "DateComparisonNode GreaterOrEqual OK");
+    }
+    {
+        DateComparisonNode dateNode(Comparison::GreaterOrEqual, {2017,6,15});
+        Assert(!dateNode.Evaluate({2017,6,14}, "event"), "DateComparisonNode GreaterOrEqual NOT OK");
+    }
+
+    {
+        DateComparisonNode dateNode(Comparison::Equal, {2017,6,15});
+        Assert(dateNode.Evaluate({2017,6,15}, "event"), "DateComparisonNode Equal OK");
+    }
+    {
+        DateComparisonNode dateNode(Comparison::Equal, {2017,6,15});
+        Assert(!dateNode.Evaluate({2017,5,15}, "event"), "DateComparisonNode Equal NOT OK");
+    }
+
+    {
+        DateComparisonNode dateNode(Comparison::NotEqual, {2017,6,15});
+        Assert(dateNode.Evaluate({2017,6,14}, "event"), "DateComparisonNode NotEqual OK");
+    }
+    {
+        DateComparisonNode dateNode(Comparison::NotEqual, {2017,6,15});
+        Assert(!dateNode.Evaluate({2017,6,15}, "event"), "DateComparisonNode NotEqual NOT OK");
+    }
+}
+
+void TestEventComparisonNode()
+{
+    {
+        EventComparisonNode eventNode(Comparison::Less, "event_1");
+        Assert(eventNode.Evaluate({0,1,1}, "event_"), "EventComparisonNode Less OK");
+    }
+    {
+        EventComparisonNode eventNode(Comparison::Less, "event_1");
+        Assert(!eventNode.Evaluate({0,1,1}, "event_2"), "EventComparisonNode Less NOT OK");
+    }
+
+    {
+        EventComparisonNode eventNode(Comparison::LessOrEqual, "event_1");
+        Assert(eventNode.Evaluate({0,1,1}, "event_1"), "EventComparisonNode LessOrEqual OK");
+    }
+    {
+        EventComparisonNode eventNode(Comparison::LessOrEqual, "event_1");
+        Assert(!eventNode.Evaluate({0,1,1}, "event_2"), "EventComparisonNode LessOrEqual NOT OK");
+    }
+
+    {
+        EventComparisonNode eventNode(Comparison::Greater, "event_1");
+        Assert(eventNode.Evaluate({0,1,1}, "event_2"), "EventComparisonNode Greater OK");
+    }
+    {
+        EventComparisonNode eventNode(Comparison::Greater, "event_1");
+        Assert(!eventNode.Evaluate({0,1,1}, "event_1"), "EventComparisonNode Greater NOT OK");
+    }
+
+    {
+        EventComparisonNode eventNode(Comparison::GreaterOrEqual, "event_1");
+        Assert(eventNode.Evaluate({0,1,1}, "event_1"), "EventComparisonNode GreaterOrEqual OK");
+    }
+    {
+        EventComparisonNode eventNode(Comparison::GreaterOrEqual, "event_1");
+        Assert(!eventNode.Evaluate({0,1,1}, "event"), "EventComparisonNode GreaterOrEqual NOT OK");
+    }
+
+    {
+        EventComparisonNode eventNode(Comparison::Equal, "event_1");
+        Assert(eventNode.Evaluate({0,1,1}, "event_1"), "EventComparisonNode Equal OK");
+    }
+    {
+        EventComparisonNode eventNode(Comparison::Equal, "event_1");
+        Assert(!eventNode.Evaluate({0,1,1}, "event_2"), "EventComparisonNode Equal NOT OK");
+    }
+
+    {
+        EventComparisonNode eventNode(Comparison::NotEqual, "event_1");
+        Assert(eventNode.Evaluate({0,1,1}, "event"), "EventComparisonNode NotEqual OK");
+    }
+    {
+        EventComparisonNode eventNode(Comparison::NotEqual, "event_1");
+        Assert(!eventNode.Evaluate({0,1,1}, "event_1"), "EventComparisonNode NotEqual NOT OK");
+    }
+}
+
+void TestLogicalOperationNode()
+{
+    {
+        shared_ptr<Node> leftPtr  = make_shared<EventComparisonNode>(Comparison::Less, "event_1");
+        shared_ptr<Node> rightPtr = make_shared<EventComparisonNode>(Comparison::NotEqual, "event");
+
+        LogicalOperationNode logicalNode(LogicalOperation::And, leftPtr, rightPtr);
+        Assert(logicalNode.Evaluate({0,1,1}, "event_"), "LogicalOperationNode And OK");
+    }
+    {
+        shared_ptr<Node> leftPtr  = make_shared<EventComparisonNode>(Comparison::Less, "event_1");
+        shared_ptr<Node> rightPtr = make_shared<EventComparisonNode>(Comparison::NotEqual, "event");
+
+        LogicalOperationNode logicalNode(LogicalOperation::And, leftPtr, rightPtr);
+        Assert(!logicalNode.Evaluate({0,1,1}, "event"), "LogicalOperationNode And NOT OK");
+    }
+
+    {
+        shared_ptr<Node> leftPtr  = make_shared<EventComparisonNode>(Comparison::GreaterOrEqual, "event_1");
+        shared_ptr<Node> rightPtr = make_shared<EventComparisonNode>(Comparison::NotEqual, "event");
+
+        LogicalOperationNode logicalNode(LogicalOperation::Or, leftPtr, rightPtr);
+        Assert(logicalNode.Evaluate({0,1,1}, "event_2"), "LogicalOperationNode Or OK");
+    }
+    {
+        shared_ptr<Node> leftPtr  = make_shared<EventComparisonNode>(Comparison::GreaterOrEqual, "event_1");
+        shared_ptr<Node> rightPtr = make_shared<EventComparisonNode>(Comparison::NotEqual, "event");
+
+        LogicalOperationNode logicalNode(LogicalOperation::Or, leftPtr, rightPtr);
+        Assert(logicalNode.Evaluate({0,1,1}, "even"), "LogicalOperationNode Or OK 2");
+    }
+    {
+        shared_ptr<Node> leftPtr  = make_shared<EventComparisonNode>(Comparison::GreaterOrEqual, "event_1");
+        shared_ptr<Node> rightPtr = make_shared<EventComparisonNode>(Comparison::Equal, "event");
+
+        LogicalOperationNode logicalNode(LogicalOperation::Or, leftPtr, rightPtr);
+        Assert(!logicalNode.Evaluate({0,1,1}, "even"), "LogicalOperationNode Or NOT OK");
+    }
+}
+
 void TestAll() {
     TestRunner tr;
     tr.RunTest(TestAddDatabase, "TestAddDatabase");
@@ -494,6 +615,40 @@ void TestAll() {
     tr.RunTest(TestLastDate, "TestLastDate");
     tr.RunTest(TestParseEvent, "TestParseEvent");
     tr.RunTest(TestFindIfDate, "TestFindIfDate");
-
-//    tr.RunTest(TestParseCondition, "TestParseCondition");
+    tr.RunTest(TestDateComparisonNode, "TestDateComparisonNode");
+    tr.RunTest(TestEventComparisonNode, "TestEventComparisonNode");
+    tr.RunTest(TestLogicalOperationNode, "TestLogicalOperationNode");
+    tr.RunTest(TestParseCondition, "TestParseCondition");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

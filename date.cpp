@@ -23,6 +23,39 @@ int Date::GetDay() const {
     return day;
 }
 
+Date ParseDate(istream& stream)
+{
+    string date_str;
+    if (stream.peek() == ' ')
+        stream.ignore(1);
+
+    getline(stream, date_str, ' ');
+    istringstream is(date_str);
+
+    bool ok = true;
+
+    int year = 0;
+    ok = ok && (is >> year);
+    ok = ok && (is.peek() == '-');
+    is.ignore(1);
+
+    int month = 0;
+    ok = ok && (is >> month);
+    ok = ok && (is.peek() == '-');
+    is.ignore(1);
+
+    int day = 0;
+    ok = ok && (is >> day);
+    ok = ok && (is.eof());
+
+    if (!ok)
+    {
+        throw logic_error("Wrong date format: " + date_str);
+    }
+
+    return {year, month, day};
+}
+
 ostream& operator<<(ostream& stream, const Date &rhs) {
   stream << setw(4) << setfill('0') << rhs.GetYear() <<
       "-" << setw(2) << setfill('0') << rhs.GetMonth() <<
