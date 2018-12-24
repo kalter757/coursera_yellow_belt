@@ -18,13 +18,14 @@ bool Database::DeleteEvent(const Date& date, const string& event) {
 }
 
 int Database::DeleteDate(const Date& date) {
-    if (storage.count(date) == 0) {
-        return 0;
-    } else {
-        const int event_count = storage[date].size();
-        storage.erase(date);
-        return event_count;
-    }
+//    if (storage.count(date) == 0) {
+//        return 0;
+//    } else {
+//        const int event_count = storage[date].size();
+//        storage.erase(date);
+//        return event_count;
+//    }
+    return 0;
 }
 
 set<string> Database::Find(const Date& date) const {
