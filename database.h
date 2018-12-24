@@ -22,10 +22,6 @@ class Database {
 public:
   void Add(const Date& date, const string& event);
 
-  bool DeleteEvent(const Date& date, const string& event);
-
-  int DeleteDate(const Date& date);
-
   set<string> Find(const Date& date) const;
 
   void Print(ostream& stream) const;
@@ -33,6 +29,8 @@ public:
   string Last(const Date& date);
 
   vector<string> FindIf(function<bool (const Date& date, const string& event)> func);
+
+  int RemoveIf(function<bool (const Date& date, const string& event)> func);
 
 private:
   map<Date, set<string>> storage;

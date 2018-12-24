@@ -27,7 +27,7 @@ string ParseEvent(istream& is) {
 void TestAll();
 
 int main() {
-    TestAll();
+//    TestAll();
 
     Database db;
 
@@ -46,15 +46,15 @@ int main() {
         {
             db.Print(cout);
         }
-//        else if (command == "Del")
-//        {
-//            auto condition = ParseCondition(is);
-//            auto predicate = [condition](const Date& date, const string& event) {
-//                return condition->Evaluate(date, event);
-//            };
-//            int count = db.RemoveIf(predicate);
-//            cout << "Removed " << count << " entries" << endl;
-//        }
+        else if (command == "Del")
+        {
+            auto condition = ParseCondition(is);
+            auto predicate = [condition](const Date& date, const string& event) {
+                return condition->Evaluate(date, event);
+            };
+            int count = db.RemoveIf(predicate);
+            cout << "Removed " << count << " entries" << endl;
+        }
         else if (command == "Find")
         {
             auto condition = ParseCondition(is);
@@ -236,7 +236,7 @@ void TestLastDate()
         db.Add({0,1,2}, "event_2");
         db.Add({0,1,2}, "event_3");
 
-        string result = "0000-01-02 event_3\n";
+        string result = "0000-01-02 event_3";
 
         AssertEqual(db.Last({0,1,2}), result, "Last date_1");
     }
@@ -247,7 +247,7 @@ void TestLastDate()
         db.Add({0,1,10}, "event_5");
         db.Add({0,1,10}, "event_6");
 
-        string result = "0000-01-10 event_6\n";
+        string result = "0000-01-10 event_6";
 
         AssertEqual(db.Last({0,1,10}), result, "Last date_2");
     }
@@ -258,7 +258,7 @@ void TestLastDate()
         db.Add({0,1,2}, "event_2");
         db.Add({0,1,2}, "event_3");
 
-        string result = "0000-01-02 event_3\n";
+        string result = "0000-01-02 event_3";
 
         try {
             AssertEqual(db.Last({0,1,1}), result, "Last date_3");
@@ -276,7 +276,7 @@ void TestLastDate()
         db.Add({0,1,10}, "event_5");
         db.Add({0,1,10}, "event_6");
 
-        string result = "0000-01-10 event_6\n";
+        string result = "0000-01-10 event_6";
 
         AssertEqual(db.Last({0,2,1}), result, "Last date_4");
     }
@@ -453,6 +453,74 @@ void TestFindIfDate()
     }
 }
 
+void TestRemoveIfDate()
+{
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        auto condition = [](const Date& date, const string& event) {
+            return date == Date(0,1,2);
+        };
+
+        AssertEqual(db.RemoveIf(condition), 3, "RemoveIf date_1");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+        db.Add({0,2,1}, "event_6");
+
+        auto condition = [](const Date& date, const string& event) {
+            return date == Date(0,2,1);
+        };
+
+        AssertEqual(db.RemoveIf(condition), 3, "FindIf date_2");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+        db.Add({0,2,1}, "event_6");
+
+        auto condition = [](const Date& date, const string& event) {
+            return event == "event_3";
+        };
+
+        AssertEqual(db.RemoveIf(condition), 1, "FindIf date_3");
+    }
+    {
+        Database db;
+
+        db.Add({0,1,2}, "event_1");
+        db.Add({0,1,2}, "event_2");
+        db.Add({0,1,2}, "event_3");
+
+        db.Add({0,2,1}, "event_4");
+        db.Add({0,2,1}, "event_5");
+        db.Add({0,2,1}, "event_6");
+
+        auto condition = [](const Date& date, const string& event) {
+            return (event == "event_3") || (event == "event_6") ;
+        };
+
+        AssertEqual(db.RemoveIf(condition), 2, "FindIf date_4");
+    }
+}
+
 void TestDateComparisonNode()
 {
     {
@@ -615,6 +683,7 @@ void TestAll() {
     tr.RunTest(TestLastDate, "TestLastDate");
     tr.RunTest(TestParseEvent, "TestParseEvent");
     tr.RunTest(TestFindIfDate, "TestFindIfDate");
+    tr.RunTest(TestRemoveIfDate, "TestRemoveIfDate");
     tr.RunTest(TestDateComparisonNode, "TestDateComparisonNode");
     tr.RunTest(TestEventComparisonNode, "TestEventComparisonNode");
     tr.RunTest(TestLogicalOperationNode, "TestLogicalOperationNode");

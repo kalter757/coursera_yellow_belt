@@ -2,7 +2,7 @@
 
 bool Node::Evaluate(const Date &date, const string &event)
 {
-    return false;
+    return true;
 }
 
 

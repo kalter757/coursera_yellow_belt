@@ -9,25 +9,6 @@ void Database::Add(const Date& date, const string& event) {
     }
 }
 
-bool Database::DeleteEvent(const Date& date, const string& event) {
-//    if (storage.count(date) > 0 && storage[date].count(event) > 0) {
-//        storage[date].erase(event);
-//        return true;
-//    }
-    return false;
-}
-
-int Database::DeleteDate(const Date& date) {
-//    if (storage.count(date) == 0) {
-//        return 0;
-//    } else {
-//        const int event_count = storage[date].size();
-//        storage.erase(date);
-//        return event_count;
-//    }
-    return 0;
-}
-
 set<string> Database::Find(const Date& date) const {
     if (storage.count(date) > 0) {
         return storage.at(date);
@@ -51,7 +32,7 @@ string Database::Last(const Date &date)
     ostringstream stream;
     if (result == storage.end())
     {
-        stream << storage.rbegin()->first << " " <<  *storage.rbegin()->second.rbegin() << endl;
+        stream << storage.rbegin()->first << " " <<  *storage.rbegin()->second.rbegin();
     }
     else
     {
@@ -60,7 +41,7 @@ string Database::Last(const Date &date)
             throw invalid_argument("Less date event!");
         }
 
-        stream << result->first << " " << *result->second.rbegin() << endl;
+        stream << result->first << " " << *result->second.rbegin();
     }
 
     return stream.str();
@@ -85,3 +66,65 @@ vector<string> Database::FindIf(function<bool (const Date& date, const string& e
 
     return result;
 }
+
+int Database::RemoveIf(function<bool (const Date &, const string &)> func)
+{
+    int removed = 0;
+
+    for (auto& record : storage)
+    {
+        Date date = record.first;
+        for(auto it = record.second.begin(); it != record.second.end(); )
+        {
+            if (func(record.first, *it)) {
+                it = record.second.erase(it);
+                ++removed;
+            } else {
+                ++it;
+            }
+        }
+
+        auto it = stable_partition(storage_vector[record.first].begin(), storage_vector[record.first].end(), [&func,&date](const string& event){return !func(date, event);});
+        if (it != storage_vector[record.first].end())
+            storage_vector[record.first].erase(it, storage_vector[record.first].end());
+    }
+
+    for(auto it = storage.begin(); it != storage.end(); )
+    {
+        if (it->second.empty()) {
+            it = storage.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    for(auto it = storage_vector.begin(); it != storage_vector.end(); )
+    {
+        if (it->second.empty()) {
+            it = storage_vector.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    return removed;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
